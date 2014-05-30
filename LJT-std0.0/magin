@@ -1,0 +1,278 @@
+ .true.              anfang: start with analyt. init cond
+ .false.              ieein (1-ieee binary input for cray)
+ .false.	      ieeout (1-ieee output for cray)
+ .false. 	      relaxation
+ .false.              jout: output current density every deltj time
+ .false.              calculate fluxsurface
+ .true.               mitsat: with satellite data
+         2            etasw: 2,3,4-parameter dep res, 1-time dep, 0-const *
+       100            800 isafe (mod int step of binary output)
+      5000            iend (last int step)
+         1            intart (=1 =>leapfrog, =2 => lax wendroff)
+      2800            1400 ivisrho (int step for smoothing rho)
+      2800            ivisu (same for p)
+     10000            nglatt (max occ of smooth)
+        20            idiag (mod intstep for diagnostics)
+        40            nrelax
+     24000            nmaxrelax
+       283            nzz (compution initially only for iz < nzz )
+     0.02             cval (perturbation level to increase nzz )
+     2.0              deltj times interval for jout
+      .05              dt timestep interval
+     1.66666667       gamma
+     0.2              eta resistivity
+     4.4              jcrit
+      .04             visx
+      .04             visy
+      .04             visz
+     0.               xmin
+    40.               xmax
+   -20.               ymin
+    20.               ymax
+   -20.               zmin
+    20.               zmax
+   -85.               psi    (rotates y,z directions)  *
+    10.               phi    (init cond.: magn shear angle)
+     1.0              bmsh   (init cond.: magn field MSH)
+     1.0              pmsp   (init cond.: pressure MSP)
+     0.1              kappa  (init cond.: magn pressure in current layer)
+     1.0              rho0   (init cond.: average density)
+     0.2              delrho (init cond.: density change)
+     0.0              xrho   (init cond.: loc density boundary)
+     2.0              dxrho  (init cond.: width of transition)
+     1.               p0          additional parameters which 
+     0.0              bx0          can be used for varies purposes
+     0.1               by0           (e.g. for equilibrium or 
+     0.1               bz0            perturbation amplitudes)
+     1.0              vx0               "
+     0.0              vy0               "
+     0.0              vz0               "
+     0.0              rho1              "
+     0.0              p1                "
+     0.0              bx1               "
+     0.0              by1               "
+     0.0              bz1               "
+     0.2              vx1               "
+     0.0              vy1               "
+     0.0              vz1               "
+     8.0              nsim, density for normalisation (cm**(-3)) *
+    25.0              bsim, magnetic field (nT) *
+   500.0              lsim, length scale (km) *
+ .false.              aequi(1) x:  grid aequidistant in x
+ .false.              aequi(2) y:  grid aequidistant in y
+ .false.              aequi(3) z:  grid aequidistant in z
+ .false.              zentr(1) x:  best res at center else at xmin
+ .true.               zentr(2) y:  same for y
+ .true.               zentr(3) z:  same for z
+     0.2              eps(1) x:  minimum gridspacing for x
+     0.2              eps(2) y:  minimum gridspacing for  y
+     0.2              eps(3) z:  minimum gridspacing for  z
+ .false.              perio(1) periodizity in x
+ .false.              perio(2) periodizity in y
+ .false.              perio(3) periodizity in z
+ .false.              lsym(1,1) line symmetry at xmin,along z
+ .false.              lsym(2,1) line symmetry at xmax,along z
+ .false.              lsym(1,2) line symmetry at ymin,along x
+ .false.              lsym(2,2) line symmetry at ymax,along x
+ .false.               lsym(1,3) line symmetry at zmin,along x
+ .false.               lsym(2,3) line symmetry at zmax,along x
+	 1              kbx(1,1)  = 0.   --- x = xmin  ---
+	 1              kby(1,1)  = 0.    symmetry/mirrorsymmetry
+	 1              kbz(1,1)  = 0.             "
+	 1              ksx(1,1)  = -1.            "
+	 1              ksy(1,1)  = -1.            "
+	 1              ksz(1,1)  = -1.            "
+     0.                  arho(1,1) = 0.   extrapolation
+     0.                  au(1,1)   = 0.        "
+     0.                  ares(1,1) = 0.        "
+     0.                  abx(1,1)  = 0.        "
+     0.                  aby(1,1)  = 0.        "
+     0.                  abz(1,1)  = 0.        "
+     0.                  asx(1,1)  = 0         "
+     0.                  asy(1,1)  = 0.        "
+     0.                  asz(1,1)  = 0.        "
+	 1              kbx(2,1)  = 0.   --- x = xmax ---
+	 1              kby(2,1)  = 0.
+	 1              kbz(2,1)  = 0.
+	 1              ksx(2,1)  = -1.
+	 1              ksy(2,1)  = -1.
+	 1              ksz(2,1)  = -1.
+     0.                  arho(2,1) = 0.
+     0.                  au(2,1)   = 0.
+     0.                  ares(2,1) = 0.
+     0.                  abx(2,1)  = 0.
+     0.                  aby(2,1)  = 0.
+     0.                  abz(2,1)  = 0.
+     0.                  asx(2,1)  = 0
+     0.                  asy(2,1)  = 0.
+     0.                  asz(2,1)  = 0.
+	 1              kbx(1,2)  = 0.   --- y = ymin ---
+	 1              kby(1,2)  = 0.
+	 1              kbz(1,2)  = 0.
+	 1              ksx(1,2)  = -1.
+	 1              ksy(1,2)  = -1.
+	 1              ksz(1,2)  = -1.
+     0.                  arho(1,2) = 0.
+     0.                  au(1,2)   = 0.
+     0.                  ares(1,2) = 0.
+     0.                  abx(1,2)  = 0.
+     0.                  aby(1,2)  = 0.
+     0.                  abz(1,2)  = 0.
+     0.                  asx(1,2)  = 0.
+     0.                  asy(1,2)  = 0.
+     0.                  asz(1,2)  = 0.
+	 1              kbx(2,2)  = 0.   --- y = ymax ---
+	 1              kby(2,2)  = 0.
+	 1              kbz(2,2)  = 0.
+	 1              ksx(2,2)  = -1.
+	 1              ksy(2,2)  = -1.
+	 1              ksz(2,2)  = -1.
+     0.                  arho(2,2) = 0.
+     0.                  au(2,2)   = 0.
+     0.                  ares(2,2) = 0.
+     0.                  abx(2,2)  = 0.
+     0.                  aby(2,2)  = 0.
+     0.                  abz(2,2)  = 0.
+     0.                  asx(2,2)  = 0.
+     0.                  asy(2,2)  = 0.
+     0.                  asz(2,2)  = 0.
+	 1              kbx(1,3)  = 0.   --- z = zmin ---
+	 1              kby(1,3)  = 0.
+	 1              kbz(1,3)  = 0.
+	 1              ksx(1,3)  = -1.
+	 1              ksy(1,3)  = -1.
+	 1              ksz(1,3)  = -1.
+     0.0                 arho(1,3) = 0.
+     0.0                 au(1,3)   = 0.
+     0.0                 ares(1,3) = 0.
+     0.0                 abx(1,3)  = 0.
+     0.0                 aby(1,3)  = 0.
+     0.0                 abz(1,3)  = 0.
+     0.0                 asx(1,3)  = 0.
+     0.0                 asy(1,3)  = 0.
+     0.                  asz(1,3)  = 0.
+	 1              kbx(2,3)  = 0.    --- z = zmax ---
+	 1              kby(2,3)  = 0.
+	 1              kbz(2,3)  = 0.
+	 1              ksx(2,3)  = -1.
+	 1              ksy(2,3)  = -1.
+	 1              ksz(2,3)  = -1.
+     0.                 arho(2,3) = 0.
+     0.                 au(2,3)   = 0.
+     0.                 ares(2,3) = 0.
+     0.                 abx(2,3)  = 0.
+     0.                 aby(2,3)  = 0.
+     0.                 abz(2,3)  = 0.
+     0.                 asx(2,3)  = 0.
+     0.                 asy(2,3)  = 0.
+     0.                 asz(2,3)  = 0.
+     0.               tsat(time for launch of satellites) *
+     0.25              tsatout(time between sat output) *
+     0.6              xpos1 (x coord. of 1. sat. set)
+    -0.5              ypos1
+     1.               zpos1
+     1.3              dxpos1 (spacing in x)
+     0.               dypos1
+    -0.               dzpos1 
+     0.               vxpos1 (velocities)
+     0.               vypos1
+     0.               vzpos1...........................
+     0.6              xpos2 (x coord. of 2. sat. set)
+    -0.0              ypos2
+    10.0              zpos2
+     1.2              dxpos2 (spacing in x)
+     0.               dypos2
+     0.               dzpos2 
+     0.               vxpos2 (velocities)
+     0.               vypos2
+     0.               vzpos2...........................
+     0.8              xpos3 (x coord. of 3. sat. set)
+    -1.2              ypos3
+   -10.               zpos3
+     1.2               dxpos3 (spacing in x)
+     0.               dypos3
+    -0.               dzpos3 
+     0.0              vxpos3 (velocities)
+     0.               vypos3
+     0.               vzpos3...........................
+    -0.6              xpos4 (x coord. of 4. sat. set)
+    -2.1              ypos4
+    10.8              zpos4
+    -1.1              dxpos4 (spacing in x)
+     0.6              dypos4
+     0.8              dzpos4 
+     0.0              vxpos4 (velocities)
+     0.               vypos4
+     0.               vzpos4...........................
+    -0.4              xpos5 (x coord. of 5. sat. set)
+     0.4              ypos5
+     0.               zpos5
+    -1.1              dxpos5 (spacing in x)
+     0.               dypos5
+    -0.               dzpos5 
+     0.               vxpos5 (velocities)
+     0.               vypos5
+     0.               vzpos5...........................
+    -0.3              xpos6 (x coord. of 6. sat. set)
+    -0.9              ypos6
+   -10.9              zpos6
+    -1.2              dxpos6 (spacing in x)
+     0.0              dypos6
+     0.0              dzpos6 
+     0.               vxpos6 (velocities)
+     0.               vypos6
+     0.               vzpos6...........................
+     1.8              xpos7 (x coord. of 7. sat. set)
+     3.               ypos7
+     6.5              zpos7
+     1.               dxpos7 (spacing in x)
+     0.               dypos7
+    -0.1              dzpos7 
+     0.0              vxpos7 (velocities)
+     0.               vypos7
+     0.               vzpos7...........................
+     4.1              xpos8 (x coord. of 8. sat. set)
+     4.4              ypos8
+     5.9              zpos8
+     0.               dxpos8 (spacing in x)
+    -0.9              dypos8
+    -0.1              dzpos8 
+    -0.05             vxpos8 (velocities)
+     0.               vypos8
+     0.               vzpos8...........................
+     7.               xpos9 (x coord. of 9. sat. set)
+     5.               ypos9
+     1.               zpos9
+     1.               dxpos9 (spacing in x)
+     0.2              dypos9
+    -0.1              dzpos9 
+    -0.04             vxpos9 (velocities)
+     0.               vypos9
+     0.               vzpos9...........................
+     5.7              xpos10 (x coord. of 10. sat. set)
+     3.8              ypos10
+    15.3              zpos10
+     0.               dxpos10 (spacing in x)
+     0.9              dypos10
+     0.3              dzpos10 
+    -0.04             vxpos10 (velocities)
+     0.               vypos10
+     0.               vzpos10...........................
+    5.7               xpos11 (x coord. of 11. sat. set)
+     5.5              ypos11
+    20.1              zpos11
+     0.9              dxpos11 (spacing in x)
+     0.0              dypos11
+    -0.1              dzpos11 
+    -0.1              vxpos11 (velocities)
+     0.               vypos11
+     0.               vzpos11...........................
+     5.1              xpos12 (x coord. of 12. sat. set)
+     5.6              ypos12
+    25.6              zpos12
+     0.               dxpos12 (spacing in x)
+    -0.1              dypos12
+     0.9              dzpos12 
+    -0.1             vxpos12 (velocities)
+     0.               vypos12
+     0.               vzpos12...........................

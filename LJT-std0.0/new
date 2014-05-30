@@ -1,0 +1,21 @@
+# This version of new includes only the portions of the tsyrelax
+# code that arise from the earlier 3D MHD code.  It does not include
+# the T96 and GeoPack subroutines.
+# Version 1
+# 8 July 2004
+
+mv misfl.f misfl.old
+
+cat	magnfl.f	first.f		orgstart.f	\
+	intstart.f	satstart.f	satdat.f	\
+	finterp.f	orgint.f	osmooth.f	\
+	pread.f		pwrite.f	grid.f		\
+	initcon.f	smooth.f	meanlax.f	\
+	lax.f		leap.f		fbound0.f	\
+	bdcoef.f	bound.f		resbd.f		\
+	termin.f	diag0.f		diag1.f		\
+	diag2.f		diag3.f		diagout.f	\
+	resist.f	binin.f		binout.f	\
+	nzznew.f	fndiag.f	> misfl.f
+
+

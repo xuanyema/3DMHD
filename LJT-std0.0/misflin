@@ -1,0 +1,215 @@
+c     program heading
+c
+c     Include file misflin
+c     Version 20
+c     This version is based on Version 19.  It differs in that the
+c     integer variable ropspmax has been removed from the outflow
+c     common block, as have axr, ayr, and azr.
+c     20 August 2004
+c
+	implicit none
+        integer   nx,ny,nz,nx1,ny1,nz1,ndiag,npos,nrow,nsat
+        real pi
+	parameter  (pi = 3.14159265536)
+	parameter  (nx = 103, ny = 53, nz = 53)
+	parameter  (nx1 = nx-1, ny1 = ny-1, nz1 = nz-1)
+	parameter  (ndiag = 25, npos = 12, nrow = 5)
+	parameter  (nsat = npos*nrow)
+c  uncomment for flux! computation 
+c	parameter  (nxneu = 45, nyneu = 41, nzneu = 33)
+c        parameter  (nxf=151,nyf=151,nzf=151,nindf=100000)
+c        parameter  (nfl1=101, nfl2=101)
+c  jfeld, uncomment for current! density output
+c	parameter  (ndiffj = 6)
+c	parameter  (nxj = nx-2*ndiffj, nyj = ny-2, nzj = nz-2)
+c  progr:
+	logical  fini,start,mitsat,ferror,newdt,jout,fluxcal,
+     +           ieein,ieeout,relax
+	integer  istep,isafe,iend,intart,etasw,nzz,nzz0,
+     +           ivisrho,ivisu,nsmooth,iferror,igrid,ldiag,idiag,
+     +           nrelax,nmrelax
+	real     tdiag(ndiag),dt,time,gamma,eta,visx,visy,visz,deltj,
+     +           nsim,bsim,vsim,psim,lsim,tsim,jcrit0,cval
+c  glgew
+	real     psi,phi,bmsh,pmsp,kappa,delrho,xrho,dxrho,
+     +           delbz,bzmsp,bzmsh,pmsh,betasp,betash,
+     +           vamsp,vamsh,csmsp,csmsh,
+     +           rho0,p0,u0,vx0,vy0,vz0,bx0,by0,bz0,
+     +           rho1,p1,u1,vx1,vy1,vz1,bx1,by1,bz1,
+     +           rhoprof(nx),uprof(nx),
+     +           bxprof(nx),byprof(nx),bzprof(nx),
+     +           sxprof(nx),syprof(nx),szprof(nx),muprof(nx,ny,nz),
+     +           rhobd(2),pbd(2),ubd(2),
+     +           vxbd(2),vybd(2),vzbd(2),bxbd(2),bybd(2),bzbd(2)
+c  mhdfeld:
+	real     bx(nx,ny,nz),by(nx,ny,nz),bz(nx,ny,nz),
+     +           sx(nx,ny,nz),sy(nx,ny,nz),sz(nx,ny,nz),
+     +           rho(nx,ny,nz),u(nx,ny,nz),res(nx,ny,nz),
+     +           prof(nx,ny,nz)
+c  hfeld:
+c
+	logical  rmask(nx,ny,nz)
+	real     feldx(nx,ny,nz),feldy(nx,ny,nz),feldz(nx,ny,nz),
+     +           hilfx(nx,ny,nz),hilfy(nx,ny,nz),hilfz(nx,ny,nz),
+     +           vx(nx,ny,nz),vy(nx,ny,nz),vz(nx,ny,nz),
+     +           help(nx,ny,nz),hilf(nx,ny,nz),
+     +           heb(nx,ny,nz),hev(nx,ny,nz)
+c  sfeld:
+c	real     fkx(nx,ny,nz),fky(nx,ny,nz),fkz(nx,ny,nz),fkt(nx,ny,nz)
+
+c  gitter:
+	logical  aequi(3),zentr(3)
+	real     xmin,ymin,zmin,xmax,ymax,zmax,eps(3),
+     +           x(nx),difx(nx),ddifx(nx),ddifpx(nx),ddifmx(nx),
+     +           meanpx(nx),meanmx(nx),
+     +           y(ny),dify(ny),ddify(ny),ddifpy(ny),ddifmy(ny),
+     +           meanpy(ny),meanmy(ny),
+     +           z(nz),difz(nz),ddifz(nz),ddifpz(nz),ddifmz(nz),
+     +           meanpz(nz),meanmz(nz)
+c  rkoeff:
+	logical  lsym(2,3), perio(3)
+	integer  kbx(2,3),kby(2,3),kbz(2,3),ksx(2,3),ksy(2,3),ksz(2,3)
+	real     arho(2,3),au(2,3),ares(2,3),
+     +           abx(2,3),aby(2,3),abz(2,3),asx(2,3),asy(2,3),asz(2,3)
+c  cobound:
+	real     crho1(2,3),crho2(2,3),cu1(2,3),cu2(2,3),
+     +           cres1(2,3),cres2(2,3),
+     +           cbx1(2,3),cbx2(2,3),cby1(2,3),cby2(2,3),
+     +           cbz1(2,3),cbz2(2,3),
+     +           csx1(2,3),csx2(2,3),csy1(2,3),csy2(2,3),
+     +           csz1(2,3),csz2(2,3)
+c  diagn1:
+	integer  ixmm(ndiag),iymm(ndiag),izmm(ndiag)
+	real     mass(ndiag),massu(ndiag),enmag(ndiag),
+     +           enkin(ndiag),enthe(ndiag),
+     +           vgradp(ndiag),vdjxb(ndiag),resj2(ndiag),
+     +           ekinpu(ndiag),ethpu(ndiag),ebpu(ndiag),
+     +           fphi(ndiag),fphip(ndiag),fphipi(ndiag),fphipr(ndiag),
+     +           frho(ndiag),fekin(ndiag),fethe(ndiag),
+     +           feb(ndiag),febi(ndiag),febr(ndiag),
+     +           fnorm(ndiag),fnmax(ndiag)
+
+c  satdia:
+	logical  startsat
+	integer  isat
+	real     tsat0,timesat,xpos(npos),ypos(npos),zpos(npos),
+     +           dxpos(npos),dypos(npos),dzpos(npos),
+     +           vxpos(npos),vypos(npos),vzpos(npos),
+     +           xsat(nsat),ysat(nsat),zsat(nsat),
+     +           vxsat(nsat),vysat(nsat),vzsat(nsat),
+     +           bxs(nsat),bys(nsat),bzs(nsat),
+     +           vxs(nsat),vys(nsat),vzs(nsat),
+     +           rhosat(nsat),psat(nsat),bsat(nsat),ptotsat(nsat),
+     +           tsatout
+
+c  neufeld, uncomment for flux! computation 
+c        real     xmineu,ymineu,zmineu,xmaxneu,ymaxneu,zmaxneu,
+c     +           xneu(nxneu),yneu(nyneu),zneu(nzneu),
+c     +           dxneu(nxneu),dyneu(nyneu),dzneu(nzneu),
+c     +           fneu(nxneu,nyneu,nzneu),epsnew(3)
+c        logical  wsmooth,mhdaus,baus,jaus,mirror,
+c     +           unif(3),zenew(3),binaus
+c     
+c  flfeld, uncomment for flux! computation 
+c      real     tflux,deltfl,rx(nfl1),ry(nfl1),rz(nfl1),
+c     +         xfmin,yfmin,zfmin,xfmax,yfmax,zfmax,
+c     +         xf(nxf),yf(nyf),zf(nzf),xfsize,yfsize,zfsize,
+c     +         delxf,delyf,delzf,
+c     +         x3d(nx),y3d(ny),z3d(nz),dx3d(nx),dy3d(ny),dz3d(nz),
+c     +         ff(nxf,nyf,nzf),fw(nindf)
+c      integer  nflux,anzint,inarea(nfl1),isum,nplane,iw(nindf),nonon0
+c      real     start00(3,5),start01(3,5),start10(3,5),dels,delint
+c      logical  mpause,inatot
+
+c  jfeld, uncomment for current! density output
+c      real     tjout,xj(nxj),yj(nyj),zj(nzj),ffj(nxj,nyj,nzj)
+c      integer  njout
+
+c  shapefunkvar:
+	real     xi(ny,nz),shp(ny,nz)
+        real     Bdx(nx,ny,nz),Bdy(nx,ny,nz),Bdz(nx,ny,nz)
+c
+c  outflow:
+	real     vfx(ny,nz),vfy(ny,nz)
+	real     brprof(nx,ny,nz)
+	real     tst,t0,tfact
+	logical  ndtprt
+
+c
+c  bmnorm:
+	real     bnxmin(2,ny,nz),bnxmax(2,ny,nz)
+	real     bnymin(nx,2,nz),bnymax(nx,2,nz)
+	real     bnzmin(nx,ny,2),bnzmax(nx,ny,2)
+
+c
+c  localsmooth:
+	logical  rhocor(nx,ny,nz),ucor(nx,ny,nz),sxyzcor(nx,ny,nz)     
+
+c:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+      common / progr    /  fini,start,etasw,mitsat,ferror,newdt,
+     +                     jout,fluxcal,ieein,ieeout,relax,
+     +                     istep,isafe,iend,intart,nzz,nzz0,
+     +                     ivisrho,ivisu,nsmooth,iferror,igrid,
+     +                     ldiag,idiag,tdiag,cval,
+     +                     nrelax,nmrelax,
+     +                     dt,time,gamma,eta,visx,visy,visz,deltj,
+     +                     nsim,bsim,vsim,psim,lsim,tsim,jcrit0
+      common / glgew    /  psi,phi,bmsh,pmsp,kappa,delrho,xrho,dxrho,
+     +                     delbz,bzmsp,bzmsh,pmsh,
+     +                     betasp,betash,vamsp,vamsh,csmsp,csmsh,
+     +                     rho0,p0,u0,vx0,vy0,vz0,bx0,by0,bz0,
+     +                     rho1,p1,u1,vx1,vy1,vz1,bx1,by1,bz1,
+     +                     rhoprof,uprof,muprof,
+     +                     bxprof,byprof,bzprof,sxprof,syprof,szprof,
+     +                     rhobd,pbd,ubd,vxbd,vybd,vzbd,bxbd,bybd,bzbd
+      common / mhdfeld  /  bx,by,bz,sx,sy,sz,rho,u,res,prof
+      common / hfeld    /  rmask,feldx,feldy,feldz,hilfx,hilfy,hilfz,
+     +                     vx,vy,vz,help,hilf,heb,hev
+c      common / sfeld    /  fkx,fky,fkz,fkt
+      common / gitter   /  aequi,zentr,eps,
+     +                     xmin,ymin,zmin,xmax,ymax,zmax,
+     +                     x,difx,ddifx,ddifpx,ddifmx,meanpx,meanmx,
+     +                     y,dify,ddify,ddifpy,ddifmy,meanpy,meanmy,
+     +                     z,difz,ddifz,ddifpz,ddifmz,meanpz,meanmz
+      common / rkoeff   /  lsym,perio,kbx,kby,kbz,ksx,ksy,ksz,
+     +                     arho,au,ares,abx,aby,abz,asx,asy,asz
+      common / cobound  /  crho1,crho2,cu1,cu2,cres1,cres2,
+     +                     cbx1,cbx2,cby1,cby2,cbz1,cbz2,
+     +                     csx1,csx2,csy1,csy2,csz1,csz2
+      common / diagn1   /  ixmm,iymm,izmm,mass,massu,enmag,enkin,enthe,
+     +                     vgradp,vdjxb,resj2,ekinpu,ethpu,ebpu,
+     +                     fphi,fphip,fphipi,fphipr,
+     +                     frho,fekin,fethe,feb,febi,febr,fnorm,
+     +                     fnmax
+      common / satdia   /  startsat,tsat0,isat,timesat,xpos,ypos,zpos,
+     +                     dxpos,dypos,dzpos,vxpos,vypos,vzpos,
+     +                     xsat,ysat,zsat,vxsat,vysat,vzsat,
+     +                     bxs,bys,bzs,vxs,vys,vzs,
+     +                     rhosat,psat,bsat,ptotsat,tsatout
+c  neufeld, uncomment for flux! computation 
+c      common / neufeld  /  xmineu,ymineu,zmineu,xmaxneu,ymaxneu,zmaxneu,
+c     +                     dxneu,dyneu,dzneu,xneu,yneu,zneu,fneu,
+c     +                     wsmooth,potcal,mhdaus,baus,jaus,mirror,
+c     +                     unif,zenew,epsnew,binaus
+c  flfeld, uncomment for flux! computation 
+c      common / flfeld   /  tflux,deltfl,rx,ry,rz,
+c     +                     xfmin,yfmin,zfmin,xfmax,yfmax,zfmax,
+c     +                     ff,xf,yf,zf,xfsize,yfsize,zfsize,fw,
+c     +                     delxf,delyf,delzf,
+c     +                     x3d,y3d,z3d,dx3d,dy3d,dz3d,
+c     +                     nflux,anzint,inarea,isum,nplane,iw,nonon0,
+c     +                     start00,start01,start10,dels,delint,
+c     +                     fluxcal,mpause,inatot
+c  jfeld, uncomment for current! density output
+c      common / fjout    /  jout,tjout,xj,yj,zj,ffj,njout
+c
+	common / shapefunkvar / xi,shp,Bdx,Bdy,Bdz
+c
+        common / outflow  / vfx,vfy,brprof,tst,t0,tfact,ndtprt
+
+c
+	common / bmnorm / bnxmin,bnxmax,bnymin,bnymax,bnzmin,bnzmax
+
+c
+	common / localsmooth / rhocor,ucor,sxyzcor
+
